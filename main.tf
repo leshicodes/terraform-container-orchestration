@@ -73,7 +73,7 @@ resource "docker_container" "docker_containers" {
     content {
       host_path      = volumes.value.host_path
       container_path = volumes.value.container_path
-      read_only = lookup(volumes.value, "read_only", false)
+      read_only      = lookup(volumes.value, "read_only", false)
     }
   }
 
@@ -101,7 +101,7 @@ resource "docker_container" "docker_containers" {
     content {
       host_path      = devices.value.host_path
       container_path = devices.value.container_path
-      permissions = lookup(devices.value, "permissions", null)
+      permissions    = lookup(devices.value, "permissions", null)
     }
   }
 
@@ -110,7 +110,7 @@ resource "docker_container" "docker_containers" {
     for_each = try(each.value.capabilities, {}) # The 'try' function allows the functionality of the JSON file NOT having the 'capabilities' block specified. If it is not there it simply wont apply this loop.
     content {
       # add = capabilities.value.add
-      add = lookup(capabilities.value, "add", null)
+      add  = lookup(capabilities.value, "add", null)
       drop = lookup(capabilities.value, "drop", null)
     }
   }

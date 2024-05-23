@@ -10,7 +10,7 @@ terraform {
 provider "docker" {
   # Linux / MacOS
   host = "unix:///var/run/docker.sock"
-  
+
   # Windows
   # host = "npipe:////.//pipe//docker_engine"
 }
