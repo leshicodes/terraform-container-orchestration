@@ -1,1 +1,4 @@
-todo
+{
+    "name": "mediaserver_network",
+    "driver": "bridge"
+}

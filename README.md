@@ -35,3 +35,18 @@ This is a custom Terraform module designed to build and manage Docker containers
 2. Run ```terraform init``` to download the module and initialize the Terraform environment.
 3. Execute ```terraform plan``` to refresh the state and run a plan. 
 4. When the plan looks good, apply it with ```terraform apply```
+
+### Container JSON File Syntax
+
+| Item | Data Type | Description |
+| --- | --- | --- |
+| **image** | Object | Docker Image Object ; Contains `name` and `tag` properties |
+| **keep_image_locally** | Boolean | True or false value indicating whether to keep the image locally |
+| **container_name** | String | Name of the container |
+| **env** | Array of Objects | List of environment variables, each with `name` and `value` properties |
+| **ports** | Array of Objects | List of port configurations, each with `internal`, `external`, and `protocol` properties |
+| **networking** | Array of Strings | List of network names (e.g., "mediaserver_network") |
+| **volumes** | Array of Objects | List of volume mounts, each with `host_path` and `container_path` properties |
+| **healthcheck** | Array of Objects | List of health checks, each with `test`, `retries`, `timeout`, and `interval` properties |
+| **devices** | Array | Empty array (no data) |
+| **capabilities** | Array | Empty array (no data) |

@@ -1,1 +1,66 @@
-todo
+{
+    "image": {
+        "name": "linuxserver/sonarr",
+        "tag": "version-4.0.4.1491"
+    },
+    "keep_image_locally": true,
+    "container_name": "sonarr",
+    "env": [
+        {
+            "name": "PUID",
+            "value": 1000
+        },
+        {
+            "name": "PGID",
+            "value": 1000
+        },
+        {
+            "name": "TZ",
+            "value": "America/Chicago"
+        },
+        {
+            "name": "DOCKER_MODS",
+            "value": "ghcr.io/gilbn/theme.park:sonarr"
+        },
+        {
+            "name": "UMASK_SET",
+            "value": "022"
+        }
+    ],
+    "ports": [
+        {
+            "internal": 8989,
+            "external": 8989,
+            "protocol": "tcp"
+        }
+    ],
+    "networking": [
+        {
+            "name": "mediaserver_network"
+        }
+    ],
+    "volumes": [
+        {
+            "host_path": "/data/containers/sonarr/config",
+            "container_path": "/config"
+        },
+        {
+            "host_path": "/data/containers/sabnzbd/downloads",
+            "container_path": "/downloads"
+        },
+        {
+            "host_path": "/media/series",
+            "container_path": "/tv"
+        }
+    ],
+    "healthcheck": [
+        {
+            "test": "CMD curl -f http://prowlarr:9696",
+            "retries": "3",
+            "timeout": "10s",
+            "interval": "10s"
+        }
+    ],
+    "devices": [],
+    "capabilities": []
+}
