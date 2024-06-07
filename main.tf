@@ -84,10 +84,10 @@ resource "docker_container" "docker_containers" {
   ]
 
   # Dynamically allocate env vars based on JSON config
-  group_add = [
-    for group_add in each.value.group_add :
-    try("${group_add.name}=${lookup(group_add, "value", "")}", null)
-  ]
+  # group_add = [
+  #   for group_add in each.value.group_add :
+  #   try("${group_add.name}=${lookup(group_add, "value", "")}", null)
+  # ]
 
   # Dynamically config healthchecks based on JSON config
   dynamic "healthcheck" {
