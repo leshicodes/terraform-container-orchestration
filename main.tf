@@ -15,13 +15,9 @@ locals {
   docker_networks = { for file in local.docker_networks_config_files : file => jsondecode(file(file)) }
 
   # Calculate container dependencies - map container names to their resource references
-  container_dependencies = {
-    for file_path, config in local.docker_containers : config.container_name => [
-      for dep_name in try(config.depends_on, []) : 
-      docker_container.docker_containers[
-        [for k, v in local.docker_containers : k if v.container_name == dep_name][0]
-      ]
-    ] if length(try(config.depends_on, [])) > 0
+  container_names_map = {
+    for file_path, config in local.docker_containers : 
+      config.container_name => file_path
   }
 }
 
@@ -55,7 +51,12 @@ resource "docker_container" "docker_containers" {
   must_run   = lookup(each.value, "must_run", true)
   gpus       = lookup(each.value, "gpus", null)
 
-  depends_on = try(local.container_dependencies[each.value.container_name], [])
+    depends_on = [
+    # This creates a static list of dependencies at parse time
+    for dep_name in lookup(each.value, "depends_on", []) : 
+      docker_container.docker_containers[local.container_names_map[dep_name]]
+      if contains(keys(local.container_names_map), dep_name)
+  ]
 
   # Dynamically allocate ports based on JSON config
   dynamic "ports" {
