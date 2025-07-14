@@ -13,18 +13,6 @@ locals {
   docker_networks_config_files = fileset("${path.root}", "${var.docker_network_config_files_path}")
   # Decode each JSON file into a map where the key is the filename and the value is the decoded JSON
   docker_networks = { for file in local.docker_networks_config_files : file => jsondecode(file(file)) }
-
-  # Map of container names to their file paths
-  container_names_map = {
-    for file_path, config in local.docker_containers : 
-      config.container_name => file_path
-  }
-  
-  # Pre-calculate dependencies
-  dependencies = {
-    for file_path, config in local.docker_containers :
-      file_path => lookup(config, "depends_on", [])
-  }
 }
 
 
@@ -134,20 +122,4 @@ resource "docker_container" "docker_containers" {
   # lifecycle {
   #   ignore_changes = [image]
   # }
-}
-
-resource "null_resource" "container_dependencies" {
-  for_each = local.docker_containers
-
-  # This ensures the null resource changes when the container changes
-  triggers = {
-    container_id = docker_container.docker_containers[each.key].id
-  }
-  
-  # This creates the actual dependency chain
-  depends_on = flatten([
-    for dep_name in lookup(each.value, "depends_on", []) :
-      [docker_container.docker_containers[local.container_names_map[dep_name]]]
-      if contains(keys(local.container_names_map), dep_name)
-  ])
 }
