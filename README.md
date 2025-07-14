@@ -50,3 +50,13 @@ This is a custom Terraform module designed to build and manage Docker containers
 | **healthcheck** | Array of Objects | List of health checks, each with `test`, `retries`, `timeout`, and `interval` properties |
 | **devices** | Array | Empty array (no data) |
 | **capabilities** | Array | Empty array (no data) |
+
+### Container Dependencies
+
+The JSON schema supports a `depends_on` array to document container dependencies, but due to Terraform limitations, these dependencies aren't enforced during deployment. Instead:
+
+- Use proper restart policies in your containers
+- Implement health checks where possible
+- Design services with retry logic for dependent services
+
+To see the documented dependencies, check the `container_dependencies` output.
