@@ -13,6 +13,16 @@ locals {
   docker_networks_config_files = fileset("${path.root}", "${var.docker_network_config_files_path}")
   # Decode each JSON file into a map where the key is the filename and the value is the decoded JSON
   docker_networks = { for file in local.docker_networks_config_files : file => jsondecode(file(file)) }
+
+  # Calculate container dependencies - map container names to their resource references
+  container_dependencies = {
+    for file_path, config in local.docker_containers : config.container_name => [
+      for dep_name in try(config.depends_on, []) : 
+      docker_container.docker_containers[
+        [for k, v in local.docker_containers : k if v.container_name == dep_name][0]
+      ]
+    ] if length(try(config.depends_on, [])) > 0
+  }
 }
 
 
@@ -41,11 +51,11 @@ resource "docker_container" "docker_containers" {
   # Default hostname to the 'container_name' JSON KVP if there is not a 'hostname' KVP.   
   hostname   = lookup(each.value, "hostname", each.value.container_name)
   domainname = lookup(each.value, "domainname", each.value.container_name)
-  # TODO
-  restart = lookup(each.value, "restart", "on-failure")
-  # TODO
-  must_run = lookup(each.value, "must_run", true)
-  gpus     = lookup(each.value, "gpus", null)
+  restart    = lookup(each.value, "restart", "on-failure")
+  must_run   = lookup(each.value, "must_run", true)
+  gpus       = lookup(each.value, "gpus", null)
+
+  depends_on = try(local.container_dependencies[each.value.container_name], [])
 
   # Dynamically allocate ports based on JSON config
   dynamic "ports" {
