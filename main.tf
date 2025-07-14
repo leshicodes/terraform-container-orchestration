@@ -14,10 +14,16 @@ locals {
   # Decode each JSON file into a map where the key is the filename and the value is the decoded JSON
   docker_networks = { for file in local.docker_networks_config_files : file => jsondecode(file(file)) }
 
-  # Calculate container dependencies - map container names to their resource references
+  # Map of container names to their file paths
   container_names_map = {
     for file_path, config in local.docker_containers : 
       config.container_name => file_path
+  }
+  
+  # Pre-calculate dependencies
+  dependencies = {
+    for file_path, config in local.docker_containers :
+      file_path => lookup(config, "depends_on", [])
   }
 }
 
@@ -50,13 +56,6 @@ resource "docker_container" "docker_containers" {
   restart    = lookup(each.value, "restart", "on-failure")
   must_run   = lookup(each.value, "must_run", true)
   gpus       = lookup(each.value, "gpus", null)
-
-    depends_on = [
-    # This creates a static list of dependencies at parse time
-    for dep_name in lookup(each.value, "depends_on", []) : 
-      docker_container.docker_containers[local.container_names_map[dep_name]]
-      if contains(keys(local.container_names_map), dep_name)
-  ]
 
   # Dynamically allocate ports based on JSON config
   dynamic "ports" {
@@ -135,4 +134,20 @@ resource "docker_container" "docker_containers" {
   # lifecycle {
   #   ignore_changes = [image]
   # }
+}
+
+resource "null_resource" "container_dependencies" {
+  for_each = local.docker_containers
+
+  # This ensures the null resource changes when the container changes
+  triggers = {
+    container_id = docker_container.docker_containers[each.key].id
+  }
+  
+  # This creates the actual dependency chain
+  depends_on = flatten([
+    for dep_name in lookup(each.value, "depends_on", []) :
+      [docker_container.docker_containers[local.container_names_map[dep_name]]]
+      if contains(keys(local.container_names_map), dep_name)
+  ])
 }
