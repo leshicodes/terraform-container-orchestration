@@ -5,6 +5,7 @@
     },
     "keep_image_locally": true,
     "container_name": "sonarr",
+    "command": ["tunnel", "--config", "/etc/cloudflared/config.yml", "run"],
     "env": [
         {
             "name": "PUID",

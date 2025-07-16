@@ -41,11 +41,10 @@ resource "docker_container" "docker_containers" {
   # Default hostname to the 'container_name' JSON KVP if there is not a 'hostname' KVP.   
   hostname   = lookup(each.value, "hostname", each.value.container_name)
   domainname = lookup(each.value, "domainname", each.value.container_name)
-  # TODO
   restart = lookup(each.value, "restart", "on-failure")
-  # TODO
   must_run = lookup(each.value, "must_run", true)
   gpus     = lookup(each.value, "gpus", null)
+  command = lookup(each.value, "command", null)
 
   # Dynamically allocate ports based on JSON config
   dynamic "ports" {

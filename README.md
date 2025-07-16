@@ -49,4 +49,5 @@ This is a custom Terraform module designed to build and manage Docker containers
 | **volumes** | Array of Objects | List of volume mounts, each with `host_path` and `container_path` properties |
 | **healthcheck** | Array of Objects | List of health checks, each with `test`, `retries`, `timeout`, and `interval` properties |
 | **devices** | Array | Empty array (no data) |
+| **command** | Array of Strings | Optional command to run in the container (e.g., ["tunnel", "--config", "/etc/cloudflared/config.yml", "run"]) |
 | **capabilities** | Array | Empty array (no data) |
